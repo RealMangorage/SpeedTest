@@ -1,93 +1,80 @@
 package org.mangorage.speedtest.core;
 
-import javax.swing.*;
-import java.awt.*;
+import org.mangorage.speedtest.Main;
+
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 
-import static org.mangorage.speedtest.core.Utils.*;
+import static org.mangorage.speedtest.core.Utils.SIZE_PER_PACKET;
 
-public class ServerSpeedTest {
-    private static final int PORT = 12345;
-
-    private JFrame frame;
-    private JLabel dataRateLabel;
-
-    private long startTime;
-    private long bytesReceived;
+public class ServerSpeedTest implements IDataRate {
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new ServerSpeedTest().start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        Main.main(new String[]{"-server", "127.0.0.1", "12345"});
     }
 
-    private void start() throws IOException {
-        frame = new JFrame("Server GUI");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 100);
+    private final String serverIP;
+    private final int serverPort;
+    private long startTime;
+    private long bytesReceived;
+    private long dataRate;
 
-        dataRateLabel = new JLabel("Data rate: 0.00 KB/s");
-        frame.getContentPane().add(BorderLayout.CENTER, dataRateLabel);
+    public ServerSpeedTest(String serverIp, int serverPort) {
+        this.serverIP = serverIp;
+        this.serverPort = serverPort;
 
-        frame.setVisible(true);
+        startServer();
+    }
 
+    private void startServer() {
         new Thread(() -> {
-            try {
-                startServer();
+            try (ServerSocket serverSocket = new ServerSocket(serverPort)) {
+                System.out.println("Server is listening on port " + serverPort);
+
+                while (true) {
+                    try (var clientSocket = serverSocket.accept(); var dis = new DataInputStream(clientSocket.getInputStream())) {
+                        System.out.println("Client connected");
+
+                        startTime = System.currentTimeMillis();
+                        bytesReceived = 0;
+
+                        byte[] buffer = new byte[SIZE_PER_PACKET];
+                        int bytesRead;
+
+                        while ((bytesRead = dis.read(buffer)) != -1) {
+                            bytesReceived += bytesRead;
+
+                            // Print data rate every second
+                            long currentTime = System.currentTimeMillis();
+                            if (currentTime - startTime >= 1000) {
+                                long elapsedTime = currentTime - startTime;
+
+                                if (elapsedTime > 0) {
+                                    this.dataRate = (long) (bytesReceived / (1024.0) / (elapsedTime / 1000.0));
+                                }
+
+                                startTime = currentTime;
+                                bytesReceived = 0;
+                            }
+                        }
+
+                    } catch (IOException ignored) {
+                    }
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }).start();
     }
 
-    private void startServer() throws IOException {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Server is listening on port " + PORT);
-
-            while (true) {
-                SwingUtilities.invokeLater(() -> dataRateLabel.setText("Data rate: No Clients"));
-                try (var clientSocket = serverSocket.accept(); var dis = new DataInputStream(clientSocket.getInputStream())) {
-                    System.out.println("Client connected");
-
-                    startTime = System.currentTimeMillis();
-                    bytesReceived = 0;
-
-                    byte[] buffer = new byte[SIZE_PER_PACKET];
-                    int bytesRead;
-
-                    while ((bytesRead = dis.read(buffer)) != -1) {
-                        bytesReceived += bytesRead;
-
-                        // Print data rate every second
-                        long currentTime = System.currentTimeMillis();
-                        if (currentTime - startTime >= 1000) {
-                            SwingUtilities.invokeLater(this::updateDataRate);
-                        }
-                    }
-
-                } catch (IOException ignored) {}
-            }
-        } finally {
-            SwingUtilities.invokeLater(() -> frame.dispose()); // Close the GUI when the server stops
-        }
+    @Override
+    public long getCurrentDataRate() {
+        return dataRate;
     }
 
-    private void updateDataRate() {
-        long currentTime = System.currentTimeMillis();
-        long elapsedTime = currentTime - startTime;
+    @Override
+    public void run() {
 
-        if (elapsedTime > 0) {
-            double dataRate = (double) bytesReceived / (1024.0) / (elapsedTime / 1000.0);
-            dataRateLabel.setText("Data rate: %s/s".formatted(formatDataSize(dataRate, useBits)));
-        }
-
-        startTime = currentTime;
-        bytesReceived = 0;
     }
 }

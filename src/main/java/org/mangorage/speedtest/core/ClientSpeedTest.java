@@ -1,54 +1,24 @@
 package org.mangorage.speedtest.core;
 
-import javax.swing.*;
-import java.awt.*;
+import org.mangorage.speedtest.Main;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
 import static org.mangorage.speedtest.core.Utils.*;
 
-public class ClientSpeedTest {
-    private static String SERVER_IP = "127.0.0.1";
-    private static int SERVER_PORT = 12345;
-
-    private JFrame frame;
-    private JLabel dataRateLabel;
-
+public class ClientSpeedTest implements IDataRate {
     public static void main(String[] args) {
-        if (args.length >= 2) {
-            if (!args[1].contains(":")) return;
-            String[] serverInfo = args[1].split(":");
-            SERVER_IP = serverInfo[0];
-            SERVER_PORT = Integer.parseInt(serverInfo[1]);
-        }
-
-
-        SwingUtilities.invokeLater(() -> {
-            try {
-                new ClientSpeedTest().start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        });
+        Main.main(new String[]{"-client", "127.0.0.1:12345"});
     }
+    private final String SERVER_IP;
+    private final int SERVER_PORT;
+    private long dataRate = 0;
 
-    private void start() throws IOException {
-        frame = new JFrame("Client GUI");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(300, 100);
-
-        dataRateLabel = new JLabel("Data rate: 0.00 KB/s");
-        frame.getContentPane().add(BorderLayout.CENTER, dataRateLabel);
-
-        JButton startButton = new JButton("Start Transmission");
-        startButton.addActionListener(e -> startTransmission());
-
-        frame.setLayout(new BorderLayout());
-        frame.add(dataRateLabel, BorderLayout.CENTER);
-        frame.add(startButton, BorderLayout.SOUTH);
-
-        frame.setVisible(true);
+    public ClientSpeedTest(String serverIp, int serverPort) {
+        this.SERVER_IP = serverIp;
+        this.SERVER_PORT = serverPort;
     }
 
     private void startTransmission() {
@@ -79,7 +49,17 @@ public class ClientSpeedTest {
     }
 
     private void updateDataRate(long bytesSent) {
-        double dataRate = (double) bytesSent / (1024.0) / 1.0;
-        dataRateLabel.setText("Data rate: %s/s".formatted(formatDataSize(dataRate, useBits)));
+        this.dataRate = (long) (bytesSent / (1024.0) / 1.0);
+
+    }
+
+    @Override
+    public long getCurrentDataRate() {
+        return dataRate;
+    }
+
+    @Override
+    public void run() {
+        startTransmission();
     }
 }
