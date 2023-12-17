@@ -7,32 +7,15 @@ public class Utils {
     public static final int SIZE_PER_PACKET = 1024 * 1024; // 1024 bytes -> 1KB
     public static final boolean useBits = true;
 
-    public static String formatDataSize(double size) {
-        return formatDataSize(size, false);
-    }
-
-    public static String formatDataSize(double size, boolean useBits) {
-        if (useBits) {
-            double bitsSize = size * 8.0; // Convert from bytes to bits
-            if (bitsSize < 1024) {
-                return String.format("%.2f %s", bitsSize, "bits");
-            } else if (bitsSize < 1048576) { // 1024 * 1024
-                return String.format("%.2f %s", bitsSize / 1024.0, "Kbits");
-            } else if (bitsSize < 1073741824) { // 1024 * 1024 * 1024
-                return String.format("%.2f %s", bitsSize / 1048576.0, "Mbits");
-            } else {
-                return String.format("%.2f %s", bitsSize / 1073741824.0, "Gbits");
-            }
+    public static String formatDataRate(double dataRate) {
+        if (dataRate < 1024) {
+            return String.format("%.2f KB", dataRate);
+        } else if (dataRate < 1048576) { // 1024 * 1024
+            return String.format("%.2f MB", dataRate / 1024.0);
+        } else if (dataRate < 1073741824) { // 1024 * 1024 * 1024
+            return String.format("%.2f GB", dataRate / 1048576.0);
         } else {
-            if (size < 1024) {
-                return String.format("%.2f %s", size, "B");
-            } else if (size < 1048576) { // 1024 * 1024
-                return String.format("%.2f %s", size / 1024.0, "KB");
-            } else if (size < 1073741824) { // 1024 * 1024 * 1024
-                return String.format("%.2f %s", size / 1048576.0, "MB");
-            } else {
-                return String.format("%.2f %s", size / 1073741824.0, "GB");
-            }
+            return String.format("%.2f TB", dataRate / 1073741824.0);
         }
     }
 
