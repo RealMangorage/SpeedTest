@@ -1,5 +1,8 @@
 package org.mangorage.speedtest;
 
+import org.mangorage.speedtest.core.ClientSpeedTest;
+import org.mangorage.speedtest.core.ServerSpeedTest;
+
 public class Main {
     public static void main(String[] args) {
         if (args.length >= 1) {

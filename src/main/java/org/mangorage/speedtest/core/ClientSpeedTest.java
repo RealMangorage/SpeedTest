@@ -1,4 +1,4 @@
-package org.mangorage.speedtest;
+package org.mangorage.speedtest.core;
 
 import javax.swing.*;
 import java.awt.*;
@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import static org.mangorage.speedtest.Utils.*;
+import static org.mangorage.speedtest.core.Utils.*;
 
 public class ClientSpeedTest {
-    private static String SERVER_IP = "10.0.0.103";
+    private static String SERVER_IP = "127.0.0.1";
     private static int SERVER_PORT = 12345;
 
     private JFrame frame;
@@ -80,7 +80,6 @@ public class ClientSpeedTest {
 
     private void updateDataRate(long bytesSent) {
         double dataRate = (double) bytesSent / (1024.0) / 1.0;
-        String formattedDataRate = formatDataRate(dataRate);
-        dataRateLabel.setText("Data rate: " + formattedDataRate + "/s");
+        dataRateLabel.setText("Data rate: %s/s".formatted(formatDataRate(dataRate)));
     }
 }

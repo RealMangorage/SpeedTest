@@ -1,10 +1,10 @@
-package org.mangorage.speedtest;
+package org.mangorage.speedtest.core;
 
 import java.util.Random;
 
 public class Utils {
     public static final Random random = new Random();
-    public static final int SIZE_PER_PACKET = 1024 * 25; // 1024 bytes -> 1KB
+    public static final int SIZE_PER_PACKET = 1024 * 1024; // 1024 bytes -> 1KB
     public static String formatDataRate(double dataRate) {
         if (dataRate < 1024) {
             return String.format("%.2f KB", dataRate);
