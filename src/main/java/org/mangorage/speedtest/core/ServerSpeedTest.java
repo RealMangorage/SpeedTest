@@ -5,10 +5,8 @@ import java.awt.*;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.net.Socket;
 
-import static org.mangorage.speedtest.core.Utils.SIZE_PER_PACKET;
-import static org.mangorage.speedtest.core.Utils.formatDataRate;
+import static org.mangorage.speedtest.core.Utils.*;
 
 public class ServerSpeedTest {
     private static final int PORT = 12345;
@@ -86,7 +84,7 @@ public class ServerSpeedTest {
 
         if (elapsedTime > 0) {
             double dataRate = (double) bytesReceived / (1024.0) / (elapsedTime / 1000.0);
-            dataRateLabel.setText("Data rate: %s/s".formatted(formatDataRate(dataRate)));
+            dataRateLabel.setText("Data rate: %s/s".formatted(formatDataSize(dataRate, useBits)));
         }
 
         startTime = currentTime;

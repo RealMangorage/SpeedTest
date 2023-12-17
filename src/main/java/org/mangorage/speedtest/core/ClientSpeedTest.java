@@ -80,6 +80,6 @@ public class ClientSpeedTest {
 
     private void updateDataRate(long bytesSent) {
         double dataRate = (double) bytesSent / (1024.0) / 1.0;
-        dataRateLabel.setText("Data rate: %s/s".formatted(formatDataRate(dataRate)));
+        dataRateLabel.setText("Data rate: %s/s".formatted(formatDataSize(dataRate, useBits)));
     }
 }
