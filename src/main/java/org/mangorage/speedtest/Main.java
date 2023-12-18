@@ -17,8 +17,8 @@ public class Main {
     public static void main(String[] args) {
         if (args.length >= 1) {
             if (args[0].equals("-server")) {
-                new Thread(ServerGUI::create).start();
                 dataTracker = new ServerSpeedTest("127.0.0.1", 12345);
+                ServerGUI.create();
             } else if (args[0].equals("-client")) {
                 if (args.length >= 2) {
                     if (!args[1].contains(":")) return;
@@ -26,8 +26,8 @@ public class Main {
                     var SERVER_IP = serverInfo[0];
                     var SERVER_PORT = Integer.parseInt(serverInfo[1]);
 
-                    new Thread(ClientGUI::create).start();
                     dataTracker = new ClientSpeedTest(SERVER_IP, SERVER_PORT);
+                    ClientGUI.create();
                 }
             }
         }
